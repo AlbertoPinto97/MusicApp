@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:music/models/song.dart';
+import 'package:just_audio/just_audio.dart';
 
 class PlayScreen extends StatefulWidget {
   PlayScreen({Key? key}) : super(key: key);
@@ -8,10 +11,53 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
-  bool isPlay = true;
+  final player = AudioPlayer();
+  Song currentSong = new Song(
+      artist: 'DIVIIK',
+      title: 'City of the Dead',
+      duration: '0:00',
+      file: 'Eurielle City of The Dead.mp3',
+      isPaused: true,
+      hasStarted: false);
+
+  @override
+  initState() {
+    super.initState();
+    loadSong();
+  }
+
+  loadSong() async {
+    var duration =
+        await player.setAsset('assets/audios/Eurielle City of The Dead.mp3');
+    if (duration != null) {
+      setState(() {
+        this.currentSong.setDuration(duration.inMinutes, duration.inSeconds);
+      });
+    }
+  }
+
+  playPauseMusic() async {
+    if (this.currentSong.isPaused) {
+      print("RESUME");
+      setState(() {
+        this.currentSong.isPaused = false;
+      });
+      await player.play();
+    } else {
+      print("PAUSE");
+      setState(() {
+        this.currentSong.isPaused = true;
+      });
+      await player.pause();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return Scaffold(
         body: Container(
       padding: EdgeInsets.symmetric(horizontal: 10),
@@ -44,7 +90,7 @@ class _PlayScreenState extends State<PlayScreen> {
               height: 25,
             ),
             Text(
-              'Title of the song',
+              currentSong.title,
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 40,
@@ -54,7 +100,7 @@ class _PlayScreenState extends State<PlayScreen> {
               height: 15,
             ),
             Text(
-              'Artist',
+              currentSong.artist,
               style: TextStyle(color: Colors.grey[400], fontSize: 25),
             ),
             Container(
@@ -88,11 +134,11 @@ class _PlayScreenState extends State<PlayScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '0:24',
+                            '0:00',
                             style: TextStyle(color: Colors.white),
                           ),
                           Text(
-                            '3:52',
+                            currentSong.duration,
                             style: TextStyle(color: Colors.white),
                           ),
                         ],
@@ -117,19 +163,15 @@ class _PlayScreenState extends State<PlayScreen> {
                           width: 20,
                         ),
                         InkWell(
-                            onTap: () => {
-                                  setState(() {
-                                    this.isPlay = !this.isPlay;
-                                  })
-                                },
-                            child: isPlay
+                            onTap: () => {playPauseMusic()},
+                            child: !this.currentSong.isPaused
                                 ? Icon(
-                                    Icons.play_circle_filled_rounded,
+                                    Icons.pause_circle_filled_rounded,
                                     color: Colors.white,
                                     size: 60,
                                   )
                                 : Icon(
-                                    Icons.pause_circle_filled_rounded,
+                                    Icons.play_circle_filled_rounded,
                                     color: Colors.white,
                                     size: 60,
                                   )),

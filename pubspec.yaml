@@ -28,6 +28,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  just_audio: ^0.9.5
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +49,7 @@ flutter:
   assets:
     - assets/images/background_image.jpg
     - assets/images/background_image_2.jpg
+    - assets/audios/Eurielle City of The Dead.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
