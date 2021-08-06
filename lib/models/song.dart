@@ -1,8 +1,9 @@
 class Song {
   final String artist;
   final String title;
-  final String file;
-  String duration;
+  final String fileName;
+  Duration duration;
+  Duration position;
   bool isPaused;
   bool hasStarted;
 
@@ -10,19 +11,30 @@ class Song {
       {required this.artist,
       required this.title,
       required this.duration,
-      required this.file,
+      required this.position,
+      required this.fileName,
       required this.isPaused,
       required this.hasStarted});
 
-  setDuration(int durationMinutes, int durationSeconds) {
+  String getDurationToString() {
     String seconds;
-    if (durationSeconds % 60 < 10) {
-      seconds = '0' + (durationSeconds % 60).toString();
+    if (duration.inSeconds % 60 < 10) {
+      seconds = '0' + (duration.inSeconds % 60).toString();
     } else {
-      seconds = (durationSeconds % 60).toString();
+      seconds = (duration.inSeconds % 60).toString();
     }
-    String minutes = durationMinutes.toString();
-    this.duration = minutes + ':' + seconds;
-    print(this.duration);
+    String minutes = duration.inMinutes.toString();
+    return minutes + ':' + seconds;
+  }
+
+  String getPositionToString() {
+    String seconds;
+    if (position.inSeconds % 60 < 10) {
+      seconds = '0' + (position.inSeconds % 60).toString();
+    } else {
+      seconds = (position.inSeconds % 60).toString();
+    }
+    String minutes = position.inMinutes.toString();
+    return minutes + ':' + seconds;
   }
 }

@@ -11,44 +11,53 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
-  final player = AudioPlayer();
-  Song currentSong = new Song(
+  final _player = AudioPlayer();
+  Song _currentSong = new Song(
       artist: 'DIVIIK',
       title: 'City of the Dead',
-      duration: '0:00',
-      file: 'Eurielle City of The Dead.mp3',
+      duration: Duration(seconds: 0),
+      position: Duration(seconds: 0),
+      fileName: 'Eurielle City of The Dead.mp3',
       isPaused: true,
       hasStarted: false);
 
   @override
   initState() {
     super.initState();
-    loadSong();
+    _loadSong();
   }
 
-  loadSong() async {
+  _loadSong() async {
     var duration =
-        await player.setAsset('assets/audios/Eurielle City of The Dead.mp3');
-    if (duration != null) {
+        await _player.setAsset('assets/audios/' + this._currentSong.fileName);
+    // Listener of the current position
+    this._player.positionStream.listen((position) {
+      if (this._currentSong.position == this._currentSong.duration) {
+        this._currentSong.isPaused = true;
+      }
       setState(() {
-        this.currentSong.setDuration(duration.inMinutes, duration.inSeconds);
+        this._currentSong.position = this._player.position;
       });
+    });
+    if (duration != null) {
+      //Gets the duration of the song
+      this._currentSong.duration = duration;
     }
   }
 
   playPauseMusic() async {
-    if (this.currentSong.isPaused) {
+    if (this._currentSong.isPaused) {
       print("RESUME");
       setState(() {
-        this.currentSong.isPaused = false;
+        this._currentSong.isPaused = false;
       });
-      await player.play();
+      await _player.play();
     } else {
       print("PAUSE");
       setState(() {
-        this.currentSong.isPaused = true;
+        this._currentSong.isPaused = true;
       });
-      await player.pause();
+      await _player.pause();
     }
   }
 
@@ -90,7 +99,7 @@ class _PlayScreenState extends State<PlayScreen> {
               height: 25,
             ),
             Text(
-              currentSong.title,
+              _currentSong.title,
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 40,
@@ -100,33 +109,41 @@ class _PlayScreenState extends State<PlayScreen> {
               height: 15,
             ),
             Text(
-              currentSong.artist,
+              _currentSong.artist,
               style: TextStyle(color: Colors.grey[400], fontSize: 25),
             ),
             Container(
-                padding: EdgeInsets.symmetric(vertical: 30),
+                padding: EdgeInsets.only(bottom: 30, top: 10),
                 child: Column(
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20))),
-                          width: 305,
-                          height: 10,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
+                        Expanded(
+                          child: Slider(
+                              activeColor: Colors.orange,
+                              inactiveColor: Colors.white,
+                              value: this
+                                  ._currentSong
+                                  .position
+                                  .inSeconds
+                                  .toDouble(),
+                              min: 0.0,
+                              max: this
+                                  ._currentSong
+                                  .duration
+                                  .inSeconds
+                                  .toDouble(),
+                              onChanged: (double value) {
+                                setState(() {
+                                  Duration newDuration =
+                                      Duration(seconds: value.toInt());
+                                  this._player.seek(newDuration);
+                                  value = value;
+                                });
+                              }),
+                        )
                       ],
-                    ),
-                    SizedBox(
-                      height: 5,
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 10),
@@ -134,11 +151,11 @@ class _PlayScreenState extends State<PlayScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '0:00',
+                            _currentSong.getPositionToString(),
                             style: TextStyle(color: Colors.white),
                           ),
                           Text(
-                            currentSong.duration,
+                            _currentSong.getDurationToString(),
                             style: TextStyle(color: Colors.white),
                           ),
                         ],
@@ -164,7 +181,7 @@ class _PlayScreenState extends State<PlayScreen> {
                         ),
                         InkWell(
                             onTap: () => {playPauseMusic()},
-                            child: !this.currentSong.isPaused
+                            child: !this._currentSong.isPaused
                                 ? Icon(
                                     Icons.pause_circle_filled_rounded,
                                     color: Colors.white,
