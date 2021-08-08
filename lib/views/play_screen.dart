@@ -11,6 +11,8 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
+  bool _isRepeating = false;
+  bool _isRandom = false;
   final _player = AudioPlayer();
   Song _currentSong = new Song(
       artist: 'DIVIIK',
@@ -19,7 +21,8 @@ class _PlayScreenState extends State<PlayScreen> {
       position: Duration(seconds: 0),
       fileName: 'Eurielle City of The Dead.mp3',
       isPaused: true,
-      hasStarted: false);
+      hasStarted: false,
+      hasEnded: false);
 
   @override
   initState() {
@@ -27,13 +30,33 @@ class _PlayScreenState extends State<PlayScreen> {
     _loadSong();
   }
 
-  _loadSong() async {
+  void _shuffleSong() {
+    setState(() {
+      this._isRandom = !this._isRandom;
+    });
+  }
+
+  void _repeatSong() {
+    setState(() {
+      this._isRepeating = !this._isRepeating;
+    });
+    this._isRepeating
+        ? this._player.setLoopMode(LoopMode.all)
+        : this._player.setLoopMode(LoopMode.off);
+  }
+
+  void _loadSong() async {
     var duration =
         await _player.setAsset('assets/audios/' + this._currentSong.fileName);
     // Listener of the current position
     this._player.positionStream.listen((position) {
-      if (this._currentSong.position == this._currentSong.duration) {
-        this._currentSong.isPaused = true;
+      if (this._currentSong.position.inSeconds ==
+          this._currentSong.duration.inSeconds) {
+        this._currentSong.hasEnded = true;
+        if (!this._isRepeating) {
+          this._currentSong.isPaused = true;
+          this._player.pause();
+        }
       }
       setState(() {
         this._currentSong.position = this._player.position;
@@ -45,7 +68,7 @@ class _PlayScreenState extends State<PlayScreen> {
     }
   }
 
-  playPauseMusic() async {
+  void playPauseMusic() async {
     if (this._currentSong.isPaused) {
       print("RESUME");
       setState(() {
@@ -169,6 +192,22 @@ class _PlayScreenState extends State<PlayScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         InkWell(
+                            onTap: () => {_shuffleSong()},
+                            child: this._isRandom
+                                ? Icon(
+                                    Icons.shuffle,
+                                    color: Colors.orange,
+                                    size: 25,
+                                  )
+                                : Icon(
+                                    Icons.shuffle,
+                                    color: Colors.white,
+                                    size: 25,
+                                  )),
+                        SizedBox(
+                          width: 30,
+                        ),
+                        InkWell(
                           child: Icon(
                             Icons.skip_previous_rounded,
                             color: Colors.white,
@@ -203,6 +242,22 @@ class _PlayScreenState extends State<PlayScreen> {
                             size: 40,
                           ),
                         ),
+                        SizedBox(
+                          width: 30,
+                        ),
+                        InkWell(
+                            onTap: () => {_repeatSong()},
+                            child: this._isRepeating
+                                ? Icon(
+                                    Icons.repeat,
+                                    color: Colors.orange,
+                                    size: 25,
+                                  )
+                                : Icon(
+                                    Icons.repeat,
+                                    color: Colors.white,
+                                    size: 25,
+                                  )),
                       ],
                     ),
                   ],

@@ -6,6 +6,7 @@ class Song {
   Duration position;
   bool isPaused;
   bool hasStarted;
+  bool hasEnded;
 
   Song(
       {required this.artist,
@@ -14,7 +15,8 @@ class Song {
       required this.position,
       required this.fileName,
       required this.isPaused,
-      required this.hasStarted});
+      required this.hasStarted,
+      required this.hasEnded});
 
   String getDurationToString() {
     String seconds;
