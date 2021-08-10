@@ -1,22 +1,20 @@
 class Song {
   final String artist;
   final String title;
-  final String fileName;
+  final String filePath;
   Duration duration;
   Duration position;
   bool isPaused;
   bool hasStarted;
-  bool hasEnded;
 
   Song(
       {required this.artist,
       required this.title,
       required this.duration,
       required this.position,
-      required this.fileName,
+      required this.filePath,
       required this.isPaused,
-      required this.hasStarted,
-      required this.hasEnded});
+      required this.hasStarted});
 
   String getDurationToString() {
     String seconds;
